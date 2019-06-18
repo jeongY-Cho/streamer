@@ -1,0 +1,55 @@
+<html>
+  <head>
+    <title>Debug Player</title>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script src="http://cdn.jsdelivr.net/npm/jstat@latest/dist/jstat.min.js"></script>
+
+    <script src="js/Syncronizer.js"></script>
+  </head>
+  <body>
+    <video id="video"></video>
+    <br />
+    <button id="load">Load Audio</button>
+
+    <script>
+      loadPlayer();
+      var syncedPlayer;
+      async function loadPlayer() {
+        syncedPlayer = new SyncedPlayer();
+        await syncedPlayer.init();
+        if (SyncedPlayer.isSupported()) {
+          var video = document.getElementById("video");
+          syncedPlayer.attachMedia(video);
+          syncedPlayer.on(SyncedPlayer.Events.MANIFEST_PARSED, function() {
+            console.log("start");
+          });
+          syncedPlayer.on(
+            SyncedPlayer.Events.FRAG_PARSING_INIT_SEGMENT,
+            (event, data) => {
+              console.log(
+                data.frag.relurl,
+                new Date(data.frag.programDateTime).toISOString()
+              );
+              console.log(syncedPlayer.serverTime - data.frag.programDateTime);
+
+              setTimeout(() => {
+                syncedPlayer.media.play();
+              }, 23000 - (syncedPlayer.serverTime - data.frag.programDateTime));
+            }
+          );
+
+          document.querySelector("#load").addEventListener("click", function() {
+            syncedPlayer.loadSource("/streams/audio.m3u8");
+          });
+        } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+          video.addEventListener("canplay", function() {
+            video.play();
+          });
+          document.querySelector("#load").addEventListener("click", function() {
+            video.src = "/streams/audio.m3u8";
+          });
+        }
+      }
+    </script>
+  </body>
+</html>
