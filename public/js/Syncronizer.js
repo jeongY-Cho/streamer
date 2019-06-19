@@ -1,8 +1,4 @@
 class SyncedPlayer extends Hls {
-  constructor(delay) {
-    super();
-    this.delay = delay || 25;
-  }
   isInit = false;
 
   async init() {
@@ -24,8 +20,6 @@ class SyncedPlayer extends Hls {
     let t0 = Date.now();
     let response = await fetch("/time");
     let t1 = Date.now();
-    console.log(t1 - t0);
-
     return t1 - t0;
   }
 
@@ -33,10 +27,11 @@ class SyncedPlayer extends Hls {
     let pings1 = [];
     let pings2 = [];
 
-    for (let _ = 0; _ < 2; _++) {
+    let sampleSize = 2;
+    for (let _ = 0; _ < sampleSize; _++) {
       pings1.push(await this.getPing());
     }
-    for (let _ = 0; _ < 2; _++) {
+    for (let _ = 0; _ < sampleSize; _++) {
       pings2.push(await this.getPing());
     }
 
@@ -115,15 +110,11 @@ class SyncedPlayer extends Hls {
 
     let joinedSE = var1 / mean1 + var2 / mean2;
     let T = (mean1 - mean2) / Math.sqrt(joinedSE);
-    let dof =
-      Math.pow(joinedSE, 2) /
-      (Math.pow(var1 / arr1.length, 2) / (arr1.length - 1) +
-        Math.pow(var2 / arr2.length, 2) / (arr2.length - 1));
+    let dof = arr1.length + arr2.length - 2;
 
     let cdf = jStat.studentt.cdf(T, dof);
-    console.log(cdf);
 
-    if (cdf < 0.525 && cdf > 0 / 475) {
+    if (cdf < 0.975 && cdf > 0.025) {
       return true;
     } else {
       return false;

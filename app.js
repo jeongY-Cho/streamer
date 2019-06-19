@@ -26,9 +26,10 @@ const path = "/streams";
 const dir = "public/videos";
 const port = 8000;
 
-const videoInput = "http://localhost:" + port + path + "/output.m3u8";
+// const videoInput = "http://localhost:" + port + path + "/output.m3u8";
+const videoInput = "rtmp://localhost:1935/live/stream";
 // const videoInput =
-//   "C:/Users/Jeong/Downloads/y2mate.com_happy_together_the_rehabilitation_project_eng20160630_qCQvM6QWSf4_720p.mp4";
+// "C:/Users/Jeong/Downloads/y2mate.com_happy_together_the_rehabilitation_project_eng20160630_qCQvM6QWSf4_720p.mp4";
 let thing = app.listen(port, async () => {
   console.log("listening on port: " + port);
   let ip = await getMyIPAddress();
@@ -38,17 +39,17 @@ let thing = app.listen(port, async () => {
   qrcode.toFile(qrpng, link, () => {
     ffmpeg()
       .input(videoInput)
+      // .inputOption(["-stream_loop -1"])
       .native()
       .output(dir + "/audio.m3u8")
       .noVideo()
       .addOption([
         "-c copy",
-        "-hls_time 5",
         "-vn",
         "-hls_list_size 6",
-        "-hls_time 3",
         "-start_number 1",
         "-hls_flags program_date_time+omit_endlist",
+        "-hls_time 2",
         "-hls_wrap 10",
         "-hls_allow_cache 0",
         "-f hls"
@@ -56,10 +57,15 @@ let thing = app.listen(port, async () => {
       .output(dir + "/video.m3u8")
       .addOption([
         "-c copy",
+        "-c:v libx264",
+        "-c:a aac",
+        "-level 3.0",
+        "-start_number 0",
         "-x264-params g=2",
-        "-hls_flags program_date_time+split_by_time+omit_endlist",
+        "-hls_time 2",
+        "-hls_allow_cache 0",
+        "-hls_flags program_date_time+omit_endlist",
         "-hls_list_size 6",
-        "-hls_time 5",
         "-hls_wrap 10",
         "-f hls"
       ])

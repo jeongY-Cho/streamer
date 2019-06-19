@@ -7,7 +7,7 @@
     <script src="js/Syncronizer.js"></script>
   </head>
   <body>
-    <video id="video"></video>
+    <video controls id="video"></video>
     <br />
     <button id="load">Load Audio</button>
 
@@ -15,7 +15,7 @@
       loadPlayer();
       var syncedPlayer;
       async function loadPlayer() {
-        syncedPlayer = new SyncedPlayer();
+        syncedPlayer = new SyncedPlayer({ startPosition: 0 });
         await syncedPlayer.init();
         if (SyncedPlayer.isSupported()) {
           var video = document.getElementById("video");
@@ -32,9 +32,13 @@
               );
               console.log(syncedPlayer.serverTime - data.frag.programDateTime);
 
+              let phi =
+                28000 - (syncedPlayer.serverTime - data.frag.programDateTime);
+              console.log(phi);
+
               setTimeout(() => {
                 syncedPlayer.media.play();
-              }, 23000 - (syncedPlayer.serverTime - data.frag.programDateTime));
+              }, 28000 - (syncedPlayer.serverTime - data.frag.programDateTime));
             }
           );
 
